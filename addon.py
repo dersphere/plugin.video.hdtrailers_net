@@ -111,7 +111,7 @@ def show_movies(source):
 
     items.extend([{
         'label': movie['title'],
-        'icon': movie['thumb'],
+        'thumbnail': movie['thumb'],
         'info': {
             'count': i,
         },
@@ -155,7 +155,7 @@ def show_videos(movie_id):
                 title = video['title']
             items.append({
                 'label': title,
-                'icon': movie['thumb'],
+                'thumbnail': movie['thumb'],
                 'info': {
                     'studio': movie['title'],
                     'tagline': video['source'],
