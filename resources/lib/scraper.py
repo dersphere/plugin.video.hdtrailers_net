@@ -21,6 +21,8 @@ import urllib2
 from BeautifulSoup import BeautifulSoup
 
 MAIN_URL = 'http://www.hd-trailers.net/'
+NEXT_IMG = 'http://static.hd-trailers.net/images/mobile/next.png'
+PREV_IMG = 'http://static.hd-trailers.net/images/mobile/prev.png'
 
 SOURCES = (
     'apple.com',

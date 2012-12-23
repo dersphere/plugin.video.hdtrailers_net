@@ -90,6 +90,7 @@ def show_movies(source):
             previous_page = str(page - 1)
             items.append({
                 'label': '<< %s %s <<' % (_('page'), previous_page),
+                'thumbnail': scraper.PREV_IMG,
                 'path': plugin.url_for(
                     endpoint='show_movies',
                     source=source,
@@ -101,6 +102,7 @@ def show_movies(source):
             next_page = str(page + 1)
             items.append({
                 'label': '>> %s %s >>' % (_('page'), next_page),
+                'thumbnail': scraper.NEXT_IMG,
                 'path': plugin.url_for(
                     endpoint='show_movies',
                     source=source,
