@@ -122,6 +122,9 @@ def show_movies(source):
             movie_id=movie['id']
         ),
     } for i, movie in enumerate(movies)])
+    content_setting = int(plugin.get_setting('content_type'))
+    content_type = ('videos', 'movies')[content_setting]
+    plugin.set_content(content_type)
 
     finish_kwargs = {
         'sort_methods': ('PLAYLIST_ORDER', 'TITLE'),
