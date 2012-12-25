@@ -23,6 +23,7 @@ from BeautifulSoup import BeautifulSoup
 MAIN_URL = 'http://www.hd-trailers.net/'
 NEXT_IMG = 'http://static.hd-trailers.net/images/mobile/next.png'
 PREV_IMG = 'http://static.hd-trailers.net/images/mobile/prev.png'
+USER_AGENT = 'XBMC Add-on HD-Trailers.net v0.1.0'
 
 SOURCES = (
     'apple.com',
@@ -143,11 +144,12 @@ def __format_date(date_str):
 
 def __get_tree(url):
     log('__get_tree opening url: %s' % url)
-    req = urllib2.Request(url)
+    headers = {'User-Agent': USER_AGENT}
+    req = urllib2.Request(url, None, headers)
     html = urllib2.urlopen(req).read()
     tree = BeautifulSoup(html, convertEntities=BeautifulSoup.HTML_ENTITIES)
     return tree
 
 
 def log(msg):
-    print(u'%s scraper: %s' % ('hd-trailes.net', msg))
+    print(u'%s scraper: %s' % (USER_AGENT, msg))
