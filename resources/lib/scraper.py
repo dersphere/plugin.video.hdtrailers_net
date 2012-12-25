@@ -36,6 +36,10 @@ SOURCES = (
 )
 
 
+class NetworkError(Exception):
+    pass
+
+
 def get_latest(page=1):
     url = MAIN_URL + 'page/%d/' % int(page)
     return _get_movies(url)
@@ -146,7 +150,11 @@ def __get_tree(url):
     log('__get_tree opening url: %s' % url)
     headers = {'User-Agent': USER_AGENT}
     req = urllib2.Request(url, None, headers)
-    html = urllib2.urlopen(req).read()
+    try:
+        html = urllib2.urlopen(req).read()
+    except urllib2.HTTPError, error:
+        raise NetworkError('HTTPError: %s' % error)
+    log('__get_tree got %d bytes' % len(html))
     tree = BeautifulSoup(html, convertEntities=BeautifulSoup.HTML_ENTITIES)
     return tree
 
