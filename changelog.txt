@@ -1,4 +1,4 @@
-0.1.0
+1.0.0
  - new icon
  - added ability to override content-type in movie-view
  - Fixed Cover in FullScreenVideo OSD
