@@ -27,7 +27,7 @@ USER_AGENT = 'XBMC Add-on HD-Trailers.net v0.1.0'
 
 SOURCES = (
     'apple.com',
-    'yahoo.com',
+    'yahoo',
     'youtube.com',
     'moviefone.com',
     'ign.com',
