@@ -127,16 +127,17 @@ def show_movies(source):
             movie_id=movie['id']
         ),
     } for i, movie in enumerate(movies)])
-    content_setting = int(plugin.get_setting('content_type'))
-    content_type = ('videos', 'movies')[content_setting]
+    content_type = plugin.get_setting(
+        'content_type', choices=('videos', 'movies')
+    )
     plugin.set_content(content_type)
 
     finish_kwargs = {
         'sort_methods': ('PLAYLIST_ORDER', 'TITLE'),
         'update_listing': 'update' in plugin.request.args
     }
-    if plugin.get_setting('force_viewmode') == 'true':
-            finish_kwargs['view_mode'] = 'thumbnail'
+    if plugin.get_setting('force_viewmode', bool):
+        finish_kwargs['view_mode'] = 'thumbnail'
     return plugin.finish(items, **finish_kwargs)
 
 
@@ -144,12 +145,12 @@ def show_movies(source):
 def show_videos(movie_id):
     movie, trailers, clips = scraper.get_videos(movie_id)
     downloads = plugin.get_storage('downloads')
-
-    resolution_setting = int(plugin.get_setting('resolution'))
-    resolution = ('480p', '720p', '1080p')[resolution_setting]
-    show_trailer = plugin.get_setting('show_trailer') == 'true'
-    show_clips = plugin.get_setting('show_clips') == 'true'
-    show_source_in_title = plugin.get_setting('show_source_in_title') == 'true'
+    resolution = plugin.get_setting(
+        'resolution', choices=('480p', '720p', '1080p')
+    )
+    show_trailer = plugin.get_setting('show_trailer', bool)
+    show_clips = plugin.get_setting('show_clips', bool)
+    show_source_in_title = plugin.get_setting('show_source_in_title', bool)
 
     videos = []
     if show_trailer:
