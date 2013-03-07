@@ -17,7 +17,7 @@
 #    along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from xbmcswift2 import Plugin
+from xbmcswift2 import Plugin, xbmcgui
 from resources.lib import scraper
 
 STRINGS = {
@@ -27,7 +27,12 @@ STRINGS = {
     'top_ten': 30004,
     'all_by_initial': 30005,
     'opening': 30006,
-    'coming_soon': 30007
+    'coming_soon': 30007,
+    'download': 30008,
+    'already_downloaded': 30009,
+    'download_in_progress': 30010,
+    'no_download_path': 30130,
+    'want_set_now': 30131
 }
 
 plugin = Plugin()
@@ -138,6 +143,7 @@ def show_movies(source):
 @plugin.route('/videos/<movie_id>/')
 def show_videos(movie_id):
     movie, trailers, clips = scraper.get_videos(movie_id)
+    downloads = plugin.get_storage('downloads')
 
     resolution_setting = int(plugin.get_setting('resolution'))
     resolution = ('480p', '720p', '1080p')[resolution_setting]
@@ -154,10 +160,17 @@ def show_videos(movie_id):
     items = []
     for i, video in enumerate(videos):
         if resolution in video.get('resolutions'):
+            url = video['resolutions'][resolution]
             if show_source_in_title:
                 title = '%s (%s)' % (video['title'], video['source'])
             else:
                 title = video['title']
+            if url in downloads:
+                import xbmcvfs  # FIXME: import from swift after fixed there
+                if xbmcvfs.exists(downloads[url]):
+                    title = '%s - %s' % (title, _('already_downloaded'))
+                else:
+                    title = '%s - %s' % (title, _('download_in_progress'))
             items.append({
                 'label': title,
                 'thumbnail': movie['thumb'],
@@ -167,11 +180,18 @@ def show_videos(movie_id):
                     'date': video['date'],
                     'count': i,
                 },
+                'context_menu': [
+                    (_('download'), 'XBMC.RunPlugin(%s)' % plugin.url_for(
+                        endpoint='download_video',
+                        source=video['source'],
+                        url=url
+                    ))
+                ],
                 'is_playable': True,
                 'path': plugin.url_for(
                     endpoint='play_video',
                     source=video['source'],
-                    url=video['resolutions'][resolution]
+                    url=url
                 ),
             })
 
@@ -183,6 +203,15 @@ def show_videos(movie_id):
 
 @plugin.route('/video/<source>/<url>')
 def play_video(source, url):
+    downloads = plugin.get_storage('downloads')
+    if url in downloads:
+        local_file = downloads[url]
+        # download was already started
+        import xbmcvfs  # FIXME: import from swift after fixed there
+        if xbmcvfs.exists(local_file):
+            # download was also finished
+            log('Using local file: %s' % local_file)
+            return plugin.set_resolved_url(local_file)
     if source == 'apple.com':
         url = '%s|User-Agent=QuickTime' % url
     elif source == 'youtube.com':
@@ -198,6 +227,37 @@ def play_video(source, url):
         url = scraper.get_yahoo_url(vid, res)
     log('Using URL: %s' % url)
     return plugin.set_resolved_url(url)
+
+
+@plugin.route('/video/<source>/<url>/download')
+def download_video(source, url):
+    import SimpleDownloader
+    sd = SimpleDownloader.SimpleDownloader()
+    if source == 'apple.com':
+        sd.common.USERAGENT = USER_AGENT
+    elif source == 'youtube.com':
+        raise NotImplementedError
+    elif source == 'yahoo-redir':
+        raise NotImplementedError
+    download_path = plugin.get_setting('download_path')
+    while not download_path:
+        try_again = xbmcgui.Dialog().yesno(
+            _('no_download_path'),
+            _('want_set_now')
+        )
+        if not try_again:
+            return
+        plugin.open_settings()
+        download_path = plugin.get_setting('download_path')
+    filename = url.split('/')[-1]
+    params = {
+        'url': url,
+        'download_path': download_path
+    }
+    sd.download(filename, params)
+    downloads = plugin.get_storage('downloads')
+    downloads[url] = xbmc.translatePath(download_path + filename)
+    downloads.sync()
 
 
 def _(string_id):
