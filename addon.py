@@ -235,7 +235,7 @@ def download_video(source, url):
     import SimpleDownloader
     sd = SimpleDownloader.SimpleDownloader()
     if source == 'apple.com':
-        sd.common.USERAGENT = USER_AGENT
+        sd.common.USERAGENT = 'QuickTime'
     elif source == 'youtube.com':
         raise NotImplementedError
     elif source == 'yahoo-redir':
