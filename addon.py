@@ -213,33 +213,22 @@ def play_video(source, url):
             # download was also finished
             log('Using local file: %s' % local_file)
             return plugin.set_resolved_url(local_file)
-    if source == 'apple.com':
-        url = '%s|User-Agent=QuickTime' % url
-    elif source == 'youtube.com':
-        import re
-        video_id = re.search(r'v=(.+)&?', url).groups(1)
-        url = (
-            'plugin://plugin.video.youtube/'
-            '?action=play_video&videoid=%s' % video_id
-        )
-    elif source == 'yahoo-redir':
-        import re
-        vid, res = re.search('id=(.+)&resolution=(.+)', url).groups()
-        url = scraper.get_yahoo_url(vid, res)
-    log('Using URL: %s' % url)
-    return plugin.set_resolved_url(url)
+    playable_url = _get_playable_url(source, url)
+    log('Using URL: %s' % playable_url)
+    return plugin.set_resolved_url(playable_url)
 
 
 @plugin.route('/video/<source>/<url>/download')
 def download_video(source, url):
     import SimpleDownloader
     sd = SimpleDownloader.SimpleDownloader()
+    playable_url = _get_playable_url(source, url)
     if source == 'apple.com':
         sd.common.USERAGENT = 'QuickTime'
+        playable_url = playable_url.split('|')[0]
     elif source == 'youtube.com':
-        raise NotImplementedError
-    elif source == 'yahoo-redir':
-        raise NotImplementedError
+        return
+        #FIXME: Show dialog that youtube downloading is not possible :-(
     download_path = plugin.get_setting('download_path')
     while not download_path:
         try_again = xbmcgui.Dialog().yesno(
@@ -250,15 +239,40 @@ def download_video(source, url):
             return
         plugin.open_settings()
         download_path = plugin.get_setting('download_path')
-    filename = url.split('/')[-1]
+    filename = playable_url.split('?')[0].split('/')[-1]
+    if filename == 'makeplaylist.dll':
+        filename = playable_url.split('=')[-1]  # yahoo...
     params = {
-        'url': url,
+        'url': playable_url,
         'download_path': download_path
     }
     sd.download(filename, params)
     downloads = plugin.get_storage('downloads')
     downloads[url] = xbmc.translatePath(download_path + filename)
     downloads.sync()
+
+
+def _get_playable_url(source, raw_url, download_mode=False):
+    if source == 'apple.com':
+        raw_url = '%s|User-Agent=QuickTime' % raw_url
+    elif source == 'youtube.com':
+        import re
+        video_id = re.search(r'v=(.+)&?', raw_url).groups(1)
+        if download_mode:
+            raw_url = (
+                'plugin://plugin.video.youtube/'
+                '?action=download&videoid=%s' % video_id
+            )
+        else:
+            raw_url = (
+                'plugin://plugin.video.youtube/'
+                '?action=play_video&videoid=%s' % video_id
+            )
+    elif source == 'yahoo-redir':
+        import re
+        vid, res = re.search('id=(.+)&resolution=(.+)', raw_url).groups()
+        raw_url = scraper.get_yahoo_url(vid, res)
+    return raw_url
 
 
 def _(string_id):
