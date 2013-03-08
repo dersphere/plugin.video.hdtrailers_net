@@ -32,7 +32,9 @@ STRINGS = {
     'already_downloaded': 30009,
     'download_in_progress': 30010,
     'no_download_path': 30130,
-    'want_set_now': 30131
+    'want_set_now': 30131,
+    'network_error': 30150,
+    'download_not_possible': 30151
 }
 
 plugin = Plugin()
@@ -227,8 +229,8 @@ def download_video(source, url):
         sd.common.USERAGENT = 'QuickTime'
         playable_url = playable_url.split('|')[0]
     elif source == 'youtube.com':
+        plugin.notify(msg=_('download_not_possible'))
         return
-        #FIXME: Show dialog that youtube downloading is not possible :-(
     download_path = plugin.get_setting('download_path')
     while not download_path:
         try_again = xbmcgui.Dialog().yesno(

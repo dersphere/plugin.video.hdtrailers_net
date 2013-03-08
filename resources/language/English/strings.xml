@@ -33,4 +33,8 @@
     <!-- OK Dialogs -->
     <string id="30130">No download path</string>
     <string id="30131">Do you want to you set it now?</string>
+
+    <!-- Notify -->
+    <string id="30150">Network Error</string>
+    <string id="30151">Download not possible atm</string>
 </strings>
