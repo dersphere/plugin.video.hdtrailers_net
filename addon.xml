@@ -12,6 +12,11 @@
   <extension point="xbmc.addon.metadata">
     <language></language>
     <platform>all</platform>
+    <website>http://www.hd-trailers.net</website>
+    <source>https://github.com/dersphere/plugin.video.hdtrailers_net</source>
+    <forum>http://forum.xbmc.org/showthread.php?tid=148400</forum>
+    <email>sphere@dersphere.de</email>
+    <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
     <summary lang="ar">المقاطع من مصادر مختلفة بنظام HD</summary>
     <summary lang="da">Trailer og klip fra adskillige kilder i HD</summary>
     <summary lang="de">Trailer und Clips aus verschiedenen Quellen in HD</summary>
